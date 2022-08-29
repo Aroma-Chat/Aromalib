@@ -1,8 +1,8 @@
 /**
  * Protocol data
  */
-const AROMA_PROTOCOL_VERSION = '0.0.2';
-const AROMA_PORT = 8080
+const AROMA_PROTOCOL_VERSION = '0.0.3';
+const AROMA_PORT = 1989
 const AROMA_PATH = 'aromachat/chat';
 
 /**
