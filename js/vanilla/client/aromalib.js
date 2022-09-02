@@ -124,7 +124,7 @@ class AromaClient {
     }
 
     connectToChannel(channel) {
-        this.we.send(JSON.stringify({
+        this.ws.send(JSON.stringify({
             type: AromaError.channellogin,
             channel: channel
         }));
