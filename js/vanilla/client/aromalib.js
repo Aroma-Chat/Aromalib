@@ -125,7 +125,7 @@ class AromaClient {
 
     connectToChannel(channel) {
         this.ws.send(JSON.stringify({
-            type: AromaError.channellogin,
+            type: "fdsafasd",
             channel: channel
         }));
     }
