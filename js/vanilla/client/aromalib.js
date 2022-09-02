@@ -35,6 +35,11 @@ const AromaError = {
  * @author Alessandro-Salerno
  */
 class AromaClient {
+    /**
+     * 
+     * @param {str} targetHost the address of the server
+     * @param {str} username the username to be used
+     */
     constructor(targetHost, username) {
         this.targetHost = targetHost;
         this.username = username;
@@ -66,21 +71,32 @@ class AromaClient {
         };
     }
 
-    // Call event listeners for a given event type
+    
+    /**
+ *   * Call all event handlers
+     * @param {str} event the event frame
+     * @param {str} eventType the event type
+     */
     callEventListeners(event, eventType) {
         this.eventListeners[`on${eventType}`].forEach(eventListener => {
             eventListener(event);
         });
     }
 
-    // Call all error handlers for a given error type
+    /**
+     * Call all error handlers
+     * @param {str} error the error frame
+     * @param {str} errorType the error type
+     */
     callErrorHandlers(error, errorType) {
         this.errorHandlers[`on${errorType}`].forEach(errorHandler => {
             errorHandler(error);
         });
     }
 
-    // Open a connection to the server
+    /**
+     * Connect to the server
+     */
     connect() {
         this.ws = new WebSocket(`ws://${this.targetHost}:${AROMA_PORT}/${AROMA_PATH}?username=${this.username}&protocol=${AROMA_PROTOCOL_VERSION}`);
 
@@ -115,7 +131,10 @@ class AromaClient {
         };
     }
 
-    // Send a user message to the server
+    /**
+     * Send a user-message to the server
+     * @param {str} message the message to be sent
+     */
     sendMessage(message) {
         this.ws.send(JSON.stringify({
             type: AromaEvent.usermessage,
@@ -123,16 +142,28 @@ class AromaClient {
         }));
     }
 
-    // Add an event listener for a given event type
+    /**
+     * Add an event listener
+     * @param {str} eventType the event type of the event listener
+     * @param {function} eventListener the event listener function
+     */
     addEventListener(eventType, eventListener) {
         this.eventListeners[`on${eventType}`].push(eventListener);
     }
 
-    // Add an error handler for a given error type
+    /**
+     * Add an error handler
+     * @param {str} errorType the error type of the error listener
+     * @param {function} errorHandler the error handler itself
+     */
     addErrorHandler(errorType, errorHandler) {
         this.errorHandlers[`on${errorType}`].push(errorHandler);
     }
 
+    /**
+     * Connect to a text channel on the remote server
+     * @param {str} channel the channel
+     */
     joinTextChannel(channel) {
         this.ws.send(JSON.stringify({
             type: AromaEvent.join,
@@ -142,6 +173,9 @@ class AromaClient {
         this.textChannel = channel;
     }
 
+    /**
+     * Leave the current text channel on the remote server
+     */
     leaveTextChannel() {
         this.ws.send(JSON.stringify({
             type: AromaEvent.leave
