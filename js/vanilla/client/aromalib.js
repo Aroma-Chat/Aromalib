@@ -123,13 +123,6 @@ class AromaClient {
         }));
     }
 
-    connectToChannel(channel) {
-        this.ws.send(JSON.stringify({
-            type: "fdsafasd",
-            channel: channel
-        }));
-    }
-
     // Add an event listener for a given event type
     addEventListener(eventType, eventListener) {
         this.eventListeners[`on${eventType}`].push(eventListener);
