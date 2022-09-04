@@ -103,24 +103,23 @@ class AromaClient {
      * Connect to the server
      */
     connect() {
-        // Whether the connection runs through WSS or not
-        let secure_connection = true;
+        // Establish a connection to the server
+        const connection = openWebSocketConnection({
+            host: this.targetHost,
+            port: AROMA_SECURE_PORT,
+            wsprotocol: 'wss',
+            username: this.username
+        });
 
-        try { this.ws = new WebSocket(`wss://${this.targetHost}:${AROMA_SECURE_PORT}/${AROMA_PATH}?username=${this.username}&protocol=${AROMA_PROTOCOL_VERSION}`); }
-        catch (e) {
-            try { this.ws = new WebSocket(`ws://${this.targetHost}:${AROMA_PORT}/${AROMA_PATH}?username=${this.username}&protocol=${AROMA_PROTOCOL_VERSION}`); }
-            catch (e) {
-                // Call error handlers and quit
-                this.callErrorHandlers({ address: this.targetHost }, AromaError.unknwonhost);
-                return;
-            }
-
-            // Signal that the connection is not secure
-            secure_connection = false;
+        // Return if the connection could not be established
+        if (connection.socket == null) {
+            this.callErrorHandlers({ address: this.targetHost }, AromaError.unknwonhost);
+            return;
         }
 
         // Trigger 'establish' event
-        this.callEventListeners({ address: this.targetHost, secure: secure_connection }, AromaEvent.establish);
+        this.ws = connection.socket;
+        this.callEventListeners({ address: this.targetHost, secure: connection.secure }, AromaEvent.establish);
 
         this.ws.onmessage = (event) => {
             // Parse JSON message
@@ -205,4 +204,20 @@ class AromaClient {
 
         this.textChannel = null;
     }
+}
+
+
+/**
+ * Auxiliatory functions
+ */
+const openWebSocketConnection = ({host, port, wsprotocol, username}) => {
+    let secure = wsprotocol == 'wss';
+    const socket = new WebSocket(`${wsprotocol}://${host}:${port}/${AROMA_PATH}?username=${username}&protocol=${AROMA_PROTOCOL_VERSION}`);
+    
+    if (wsprotocol == 'ws') socket = null;
+    else if (!socket.OPEN) {
+        socket = openWebSocketConnection(host, AROMA_PORT, 'ws', username);
+    }
+
+    return { socket: socket, secure: secure };
 }
