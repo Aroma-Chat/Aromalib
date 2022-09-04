@@ -103,19 +103,7 @@ class AromaClient {
      * Connect to the server
      */
     connect() {
-        // Establish a connection to the server
-        const connection = openWebSocketConnection({
-            host: this.targetHost,
-            port: AROMA_SECURE_PORT,
-            wsprotocol: 'wss',
-            username: this.username
-        });
-
-        // Return if the connection could not be established
-        if (connection.socket == null) {
-            this.callErrorHandlers({ address: this.targetHost }, AromaError.unknwonhost);
-            return;
-        }
+        this.ws = new WebSocket(`ws://${this.targetHost}:${AROMA_PORT}/${AROMA_PATH}?username=${this.username}&protocol=${AROMA_PROTOCOL_VERSION}`);
 
         // Trigger 'establish' event
         this.ws = connection.socket;
@@ -204,30 +192,4 @@ class AromaClient {
 
         this.textChannel = null;
     }
-}
-
-
-/**
- * Auxiliatory functions
- */
-const openWebSocketConnection = ({host, port, wsprotocol, username}) => {
-    let secure = wsprotocol == 'wss';
-    const socket = new WebSocket(`${wsprotocol}://${host}:${port}/${AROMA_PATH}?username=${username}&protocol=${AROMA_PROTOCOL_VERSION}`);
-    let connection = { socket: socket, secure: secure };
-    
-    socket.onerror = (error) => {
-        if (wsprotocol == 'ws') {
-            connection.socket = null;
-            return;
-        }
-
-        connection = openWebSocketConnection({
-            host: host,
-            port: AROMA_PORT,
-            wsprotocol: 'ws',
-            username: username
-        });
-    }
-
-    return connection;
 }
