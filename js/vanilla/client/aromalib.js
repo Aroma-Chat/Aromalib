@@ -105,9 +105,9 @@ class AromaClient {
     connect() {
         this.ws = new WebSocket(`ws://${this.targetHost}:${AROMA_PORT}/${AROMA_PATH}?username=${this.username}&protocol=${AROMA_PROTOCOL_VERSION}`);
 
-        // Trigger 'establish' event
-        this.ws = connection.socket;
-        this.callEventListeners({ address: this.targetHost, secure: connection.secure }, AromaEvent.establish);
+        // // Trigger 'establish' event
+        // this.ws = connection.socket;
+        // this.callEventListeners({ address: this.targetHost, secure: connection.secure }, AromaEvent.establish);
 
         this.ws.onmessage = (event) => {
             // Parse JSON message
