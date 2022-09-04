@@ -216,7 +216,12 @@ const openWebSocketConnection = ({host, port, wsprotocol, username}) => {
     
     if (wsprotocol == 'ws') socket = null;
     else if (!socket.OPEN) {
-        socket = openWebSocketConnection(host, AROMA_PORT, 'ws', username);
+        return openWebSocketConnection({
+            host: host,
+            port: AROMA_PORT,
+            wsprotocol: 'ws',
+            username: username
+        });
     }
 
     return { socket: socket, secure: secure };
