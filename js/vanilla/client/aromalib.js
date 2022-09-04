@@ -214,7 +214,8 @@ const openWebSocketConnection = ({host, port, wsprotocol, username}) => {
     let secure = wsprotocol == 'wss';
     const socket = new WebSocket(`${wsprotocol}://${host}:${port}/${AROMA_PATH}?username=${username}&protocol=${AROMA_PROTOCOL_VERSION}`);
     
-    if (socket.readyState != WebSocket.OPEN) {
+    if (socket.readyState != WebSocket.OPEN &&
+        socket.readyState != WebSocket.CONNECTING) {
         if (wsprotocol == 'ws') return { socket: null, secure: false };
 
         return openWebSocketConnection({
