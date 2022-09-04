@@ -1,14 +1,16 @@
 /**
  * Protocol data
  */
-const AROMA_PROTOCOL_VERSION = '0.0.3';
-const AROMA_PORT = 1989
+const AROMA_PROTOCOL_VERSION = '0.0.5';
+const AROMA_SECURE_PORT = 1990;
+const AROMA_PORT = 1989;
 const AROMA_PATH = 'aromachat/chat';
 
 /**
  * Available events
  */
 const AromaEvent = {
+    establish: 'establish',
     login: 'login',
     logout: 'logout',
     join: 'join',
@@ -26,7 +28,8 @@ const AromaEvent = {
 const AromaError = {
     wserror: 'wserror',
     disconnect: 'disconnect',
-    invalidtype: 'invalidtype'
+    invalidtype: 'invalidtype',
+    unknwonhost: 'unknownhost'
 };
 
 
@@ -52,6 +55,7 @@ class AromaClient {
 
         // Event listeners
         this.eventListeners = {
+            onestablish: [],
             onlogin: [],
             onlogout: [],
             onjoin: [],
@@ -67,7 +71,8 @@ class AromaClient {
         this.errorHandlers = {
             onwserror: [],
             ondisconnect: [],
-            oninvalidtype: []
+            oninvalidtype: [],
+            onunknownhost: []
         };
     }
 
@@ -98,7 +103,24 @@ class AromaClient {
      * Connect to the server
      */
     connect() {
-        this.ws = new WebSocket(`ws://${this.targetHost}:${AROMA_PORT}/${AROMA_PATH}?username=${this.username}&protocol=${AROMA_PROTOCOL_VERSION}`);
+        // Whether the connection runs through WSS or not
+        let secure_connection = true;
+
+        try { this.ws = new WebSocket(`wss://${this.targetHost}:${AROMA_SECURE_PORT}/${AROMA_PATH}?username=${this.username}&protocol=${AROMA_PROTOCOL_VERSION}`); }
+        catch (e) {
+            try { this.ws = new WebSocket(`ws://${this.targetHost}:${AROMA_PORT}/${AROMA_PATH}?username=${this.username}&protocol=${AROMA_PROTOCOL_VERSION}`); }
+            catch (e) {
+                // Call error handlers and quit
+                this.callErrorHandlers({ address: this.targetHost }, AromaError.unknwonhost);
+                return;
+            }
+
+            // Signal that the connection is not secure
+            secure_connection = false;
+        }
+
+        // Trigger 'establish' event
+        this.callEventListeners({ address: this.targetHost, secure: secure_connection }, AromaEvent.establish);
 
         this.ws.onmessage = (event) => {
             // Parse JSON message
