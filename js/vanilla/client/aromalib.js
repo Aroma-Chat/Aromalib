@@ -213,12 +213,15 @@ class AromaClient {
 const openWebSocketConnection = ({host, port, wsprotocol, username}) => {
     let secure = wsprotocol == 'wss';
     const socket = new WebSocket(`${wsprotocol}://${host}:${port}/${AROMA_PATH}?username=${username}&protocol=${AROMA_PROTOCOL_VERSION}`);
+    let connection = { socket: socket, secure: secure };
     
-    if (socket.readyState != WebSocket.OPEN &&
-        socket.readyState != WebSocket.CONNECTING) {
-        if (wsprotocol == 'ws') return { socket: null, secure: false };
+    socket.onerror = (error) => {
+        if (wsprotocol == 'ws') {
+            connection.socket = null;
+            return;
+        }
 
-        return openWebSocketConnection({
+        connection = openWebSocketConnection({
             host: host,
             port: AROMA_PORT,
             wsprotocol: 'ws',
@@ -226,5 +229,5 @@ const openWebSocketConnection = ({host, port, wsprotocol, username}) => {
         });
     }
 
-    return { socket: socket, secure: secure };
+    return connection;
 }
