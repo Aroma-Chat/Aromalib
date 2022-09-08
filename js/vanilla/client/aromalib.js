@@ -193,3 +193,9 @@ class AromaClient {
         this.textChannel = null;
     }
 }
+
+export {
+    AromaEvent,
+    AromaError,
+    AromaClient
+};
